@@ -17,21 +17,21 @@ export default async function SchedulePage({
   return (
     <div>
       <div className="mb-4">
-        <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900">
-          ← Dashboard
+        <Link href="/hr" className="text-sm text-muted hover:text-fg transition">
+          &larr; Dashboard
         </Link>
       </div>
 
       <div className="flex items-end justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Interview Schedule</h1>
-          <p className="text-neutral-500 mt-1">{job.title}</p>
+          <h1 className="text-3xl font-bold tracking-tight text-fg">Interview Schedule</h1>
+          <p className="text-muted mt-1">{job.title}</p>
         </div>
         <Link
-          href={`/jobs/${job.id}/ranking`}
-          className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition"
+          href={`/hr/jobs/${job.id}/ranking`}
+          className="rounded-lg border border-cardborder px-4 py-2 text-sm font-medium text-muted hover:text-fg hover:bg-cardhover transition"
         >
-          ← Back to Rankings
+          &larr; Back to Rankings
         </Link>
       </div>
 

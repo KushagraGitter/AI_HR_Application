@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: #0f1117;
+  --color-fg: #e4e4eb;
+  --color-card: #181a24;
+  --color-cardborder: #252836;
+  --color-cardhover: #1e2132;
+  --color-muted: #8b8fa3;
+  --color-accent: #6c5ce7;
+  --color-accentlt: #a78bfa;
+  --color-accentglow: #1b1733;
+  --color-surface: #14161f;
+  --color-ctext: #2dd4bf;
+  --color-ctextglow: #0d2d28;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: #0f1117;
+  color: #e4e4eb;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.mesh-bg {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 92, 231, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(45, 212, 191, 0.06), transparent),
+    #0f1117;
+}
+
+.glass-card {
+  background: rgba(24, 26, 36, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid #252836;
+}
+
+input, textarea, select {
+  color: #e4e4eb;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #8b8fa3;
+  opacity: 0.6;
+}
+
+input[type="checkbox"] {
+  accent-color: #6c5ce7;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #252836;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8b8fa3;
 }

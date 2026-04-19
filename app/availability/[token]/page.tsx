@@ -9,8 +9,10 @@ export default async function AvailabilityPage({
 }) {
   const { token } = await params
   return (
-    <div className="max-w-xl mx-auto">
-      <AvailabilityClient token={token} />
+    <div className="mesh-bg min-h-screen">
+      <div className="max-w-xl mx-auto px-6 py-8">
+        <AvailabilityClient token={token} />
+      </div>
     </div>
   )
 }

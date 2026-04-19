@@ -6,7 +6,7 @@ interface Props {
   jobId: string
 }
 
-export default function CandidateForm({ jobId }: Props) {
+export default function CandidateApplicationForm({ jobId }: Props) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [resume, setResume] = useState("")
@@ -33,7 +33,6 @@ export default function CandidateForm({ jobId }: Props) {
       }
       const data = await res.json()
       setSubmitted({ score: data.score ?? 0, name: data.name })
-      // Reset form
       setName(""); setEmail(""); setResume(""); setLinkedinUrl(""); setGithubUrl("")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
@@ -45,16 +44,20 @@ export default function CandidateForm({ jobId }: Props) {
   if (submitted) {
     return (
       <div>
-        <div className="rounded-md bg-green-50 border border-green-200 p-4 mb-4">
-          <p className="text-sm font-medium text-green-800">
-            ✓ Application received, {submitted.name}. The agent scored your profile at {submitted.score}/100.
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 mb-4">
+          <p className="text-sm font-medium text-emerald-300">
+            Application received, {submitted.name}! Your profile has been scored at{" "}
+            <span className="font-bold">{submitted.score}/100</span> by our AI screening agent.
+          </p>
+          <p className="text-xs text-emerald-400/70 mt-1">
+            Our HR team will review shortlisted candidates and reach out if there is a match.
           </p>
         </div>
         <button
           onClick={() => setSubmitted(null)}
-          className="text-sm text-neutral-600 hover:text-neutral-900"
+          className="text-sm text-ctext hover:text-ctext/80 font-medium transition"
         >
-          Submit another application →
+          Submit another application &rarr;
         </button>
       </div>
     )
@@ -64,57 +67,59 @@ export default function CandidateForm({ jobId }: Props) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1.5">Full Name *</label>
+          <label className="block text-sm font-medium text-fg/80 mb-1.5">Full Name *</label>
           <input
             type="text" required
             value={name} onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+            placeholder="John Doe"
+            className="w-full rounded-lg border border-cardborder bg-surface px-3 py-2.5 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-ctext/40 focus:border-ctext/40 transition"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1.5">Email *</label>
+          <label className="block text-sm font-medium text-fg/80 mb-1.5">Email *</label>
           <input
             type="email" required
             value={email} onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+            placeholder="john@example.com"
+            className="w-full rounded-lg border border-cardborder bg-surface px-3 py-2.5 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-ctext/40 focus:border-ctext/40 transition"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1.5">Resume *</label>
+        <label className="block text-sm font-medium text-fg/80 mb-1.5">Resume *</label>
         <textarea
           required
           value={resume} onChange={(e) => setResume(e.target.value)}
           rows={8}
           placeholder="Paste your resume text here. Include experience, skills, education, projects."
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 resize-none"
+          className="w-full rounded-lg border border-cardborder bg-surface px-3 py-2.5 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-ctext/40 focus:border-ctext/40 resize-none transition"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-1.5">LinkedIn URL</label>
+          <label className="block text-sm font-medium text-fg/80 mb-1.5">LinkedIn URL</label>
           <input
             type="url"
             value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)}
             placeholder="https://linkedin.com/in/..."
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+            className="w-full rounded-lg border border-cardborder bg-surface px-3 py-2.5 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-ctext/40 focus:border-ctext/40 transition"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1.5">GitHub URL</label>
+          <label className="block text-sm font-medium text-fg/80 mb-1.5">GitHub URL</label>
           <input
             type="url"
             value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)}
             placeholder="https://github.com/..."
-            className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+            className="w-full rounded-lg border border-cardborder bg-surface px-3 py-2.5 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-ctext/40 focus:border-ctext/40 transition"
           />
         </div>
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
           {error}
         </div>
       )}
@@ -122,9 +127,9 @@ export default function CandidateForm({ jobId }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="rounded-md bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:bg-neutral-400 transition"
+        className="rounded-lg bg-ctext/90 px-5 py-2.5 text-sm font-medium text-white hover:bg-ctext transition disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(45,212,191,0.15)]"
       >
-        {loading ? "Agent is scoring your profile..." : "Submit Application"}
+        {loading ? "Evaluating your profile..." : "Submit Application"}
       </button>
     </form>
   )

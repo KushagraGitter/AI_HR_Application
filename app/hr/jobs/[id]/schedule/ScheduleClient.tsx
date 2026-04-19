@@ -102,18 +102,18 @@ export default function ScheduleClient({ jobId }: Props) {
 
   return (
     <div>
-      <div className="rounded-lg border border-neutral-200 bg-white p-5 mb-6">
+      <div className="rounded-2xl border border-cardborder bg-card/70 p-5 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-neutral-600">
-              {readyCount} candidate{readyCount === 1 ? "" : "s"} ready to schedule ·{" "}
+            <p className="text-sm text-muted">
+              {readyCount} candidate{readyCount === 1 ? "" : "s"} ready to schedule &middot;{" "}
               {totalScheduled} already scheduled
             </p>
           </div>
           <button
             onClick={handleSchedule}
             disabled={readyCount === 0 || scheduling}
-            className="rounded-md bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition"
+            className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-[0_0_20px_rgba(108,92,231,0.2)]"
           >
             {scheduling ? "Agent is assigning slots..." : "Schedule All Ready Candidates"}
           </button>
@@ -121,16 +121,16 @@ export default function ScheduleClient({ jobId }: Props) {
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-4">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300 mb-4">
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm text-neutral-500">Loading...</p>
+        <p className="text-sm text-muted">Loading...</p>
       ) : slots.length === 0 ? (
-        <div className="rounded-lg border-2 border-dashed border-neutral-300 bg-white p-8 text-center">
-          <p className="text-sm text-neutral-500">
+        <div className="rounded-2xl border-2 border-dashed border-cardborder bg-card/30 p-8 text-center">
+          <p className="text-sm text-muted">
             No scheduled interviews yet. Candidates must submit availability first.
           </p>
         </div>
@@ -139,32 +139,32 @@ export default function ScheduleClient({ jobId }: Props) {
           {slots.map((s) => (
             <div
               key={s.candidateId}
-              className="rounded-lg border border-neutral-200 bg-white p-5 flex items-center gap-4"
+              className="rounded-2xl border border-cardborder bg-card/70 p-5 flex items-center gap-4"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold">{s.candidateName}</h3>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                    ✓ Scheduled
+                  <h3 className="font-semibold text-fg">{s.candidateName}</h3>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-medium text-emerald-400 ring-1 ring-emerald-500/20">
+                    Scheduled
                   </span>
                 </div>
-                <p className="text-sm text-neutral-500">{s.candidateEmail}</p>
+                <p className="text-sm text-muted">{s.candidateEmail}</p>
                 <div className="mt-2 flex items-center gap-4 text-sm">
                   <div>
-                    <span className="text-xs uppercase tracking-wider text-neutral-400">Panel</span>
-                    <p className="font-medium">{s.panelMember}</p>
+                    <span className="text-xs uppercase tracking-wider text-muted">Panel</span>
+                    <p className="font-medium text-fg/80">{s.panelMember}</p>
                   </div>
                   <div>
-                    <span className="text-xs uppercase tracking-wider text-neutral-400">Time</span>
-                    <p className="font-medium">{formatSlot(s.slot)}</p>
+                    <span className="text-xs uppercase tracking-wider text-muted">Time</span>
+                    <p className="font-medium text-fg/80">{formatSlot(s.slot)}</p>
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => downloadIcs(s.icsFile, s.candidateName)}
-                className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition"
+                className="rounded-lg border border-cardborder px-4 py-2 text-sm font-medium text-muted hover:text-fg hover:bg-cardhover transition"
               >
-                ↓ Download .ics
+                Download .ics
               </button>
             </div>
           ))}

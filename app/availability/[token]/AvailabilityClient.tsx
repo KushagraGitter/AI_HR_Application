@@ -9,8 +9,6 @@ interface Info {
 }
 
 function generateSlots(): { iso: string; label: string }[] {
-  // Use hardcoded slots matching panel data in /lib/agent/panelData.ts
-  // This ensures the scheduler actually finds overlap during the demo
   const slots = [
     "2026-04-22T10:00:00",
     "2026-04-22T14:00:00",
@@ -100,13 +98,13 @@ export default function AvailabilityClient({ token }: Props) {
     }
   }
 
-  if (loading) return <p className="text-center text-neutral-500 mt-12">Loading...</p>
+  if (loading) return <p className="text-center text-muted mt-12">Loading...</p>
 
   if (notFound) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center mt-12">
-        <h1 className="text-xl font-semibold text-red-900 mb-2">Invalid or Expired Link</h1>
-        <p className="text-sm text-red-700">
+      <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-center mt-12">
+        <h1 className="text-xl font-semibold text-red-300 mb-2">Invalid or Expired Link</h1>
+        <p className="text-sm text-red-400/80">
           This availability link is not valid. Please check your email for the correct link.
         </p>
       </div>
@@ -115,10 +113,10 @@ export default function AvailabilityClient({ token }: Props) {
 
   if (submitted) {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center mt-12">
-        <div className="text-4xl mb-3">✓</div>
-        <h1 className="text-xl font-semibold text-green-900 mb-2">Thank you, {info?.candidateName}</h1>
-        <p className="text-sm text-green-800">
+      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center mt-12">
+        <div className="text-4xl mb-3 text-emerald-400">&#10003;</div>
+        <h1 className="text-xl font-semibold text-emerald-300 mb-2">Thank you, {info?.candidateName}</h1>
+        <p className="text-sm text-emerald-400/80">
           We have received your availability. We will confirm your interview slot shortly via email.
         </p>
       </div>
@@ -127,37 +125,37 @@ export default function AvailabilityClient({ token }: Props) {
 
   return (
     <div className="mt-8">
-      <h1 className="text-2xl font-bold tracking-tight mb-1">Hi {info?.candidateName},</h1>
-      <p className="text-neutral-600 mb-8">
+      <h1 className="text-2xl font-bold tracking-tight text-fg mb-1">Hi {info?.candidateName},</h1>
+      <p className="text-muted mb-8">
         Please select all times when you are available for the interview for{" "}
-        <strong>{info?.jobTitle}</strong>. We will match you with a panel member.
+        <strong className="text-fg">{info?.jobTitle}</strong>. We will match you with a panel member.
       </p>
 
-      <div className="rounded-lg border border-neutral-200 bg-white p-6">
-        <h2 className="font-semibold mb-4">Available slots ({selected.size} selected)</h2>
+      <div className="rounded-2xl border border-cardborder bg-card/70 p-6">
+        <h2 className="font-semibold text-fg mb-4">Available slots ({selected.size} selected)</h2>
         <div className="grid grid-cols-2 gap-2 mb-6">
           {slots.map((s) => (
             <label
               key={s.iso}
-              className={`flex items-center gap-2 rounded-md border p-3 cursor-pointer transition ${
+              className={`flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition-all duration-200 ${
                 selected.has(s.iso)
-                  ? "border-neutral-900 bg-neutral-50"
-                  : "border-neutral-200 hover:border-neutral-300"
+                  ? "border-accent/50 bg-accentglow ring-1 ring-accent/30"
+                  : "border-cardborder hover:border-cardborder/80 hover:bg-cardhover"
               }`}
             >
               <input
                 type="checkbox"
                 checked={selected.has(s.iso)}
                 onChange={() => toggle(s.iso)}
-                className="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+                className="h-4 w-4 rounded border-cardborder"
               />
-              <span className="text-sm">{s.label}</span>
+              <span className="text-sm text-fg/80">{s.label}</span>
             </label>
           ))}
         </div>
 
         {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-4">
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300 mb-4">
             {error}
           </div>
         )}
@@ -165,7 +163,7 @@ export default function AvailabilityClient({ token }: Props) {
         <button
           onClick={handleSubmit}
           disabled={selected.size === 0 || submitting}
-          className="w-full rounded-md bg-neutral-900 px-5 py-3 text-sm font-medium text-white hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition"
+          className="w-full rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-[0_0_20px_rgba(108,92,231,0.2)]"
         >
           {submitting
             ? "Submitting..."

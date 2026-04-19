@@ -64,39 +64,39 @@ export default function OutreachCard({
   }
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-5">
+    <div className="rounded-2xl border border-cardborder bg-card/70 p-5">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="font-semibold">{candidateName}</h3>
-          <p className="text-xs text-neutral-500 mt-0.5">→ {candidateEmail}</p>
+          <h3 className="font-semibold text-fg">{candidateName}</h3>
+          <p className="text-xs text-muted mt-0.5">&rarr; {candidateEmail}</p>
         </div>
         {sent && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">
-            ✓ Email Sent
+          <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-2.5 py-0.5 text-xs font-medium text-violet-300 ring-1 ring-violet-500/20">
+            Email Sent
           </span>
         )}
       </div>
 
-      <div className="rounded-md bg-neutral-50 border border-neutral-200 p-4 mb-3">
-        <pre className="whitespace-pre-wrap text-sm text-neutral-800 font-sans leading-relaxed">
+      <div className="rounded-xl bg-surface border border-cardborder p-4 mb-3">
+        <pre className="whitespace-pre-wrap text-sm text-fg/80 font-sans leading-relaxed">
           {renderedDraft}
         </pre>
       </div>
 
       {messageId && (
-        <div className="rounded-md bg-green-50 border border-green-200 p-3 mb-3 text-xs text-green-800">
-          <div className="font-medium">✓ Delivered via Resend</div>
-          <div className="font-mono text-[11px] mt-0.5 text-green-700">Message ID: {messageId}</div>
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 mb-3 text-xs text-emerald-300">
+          <div className="font-medium">Delivered via Resend</div>
+          <div className="font-mono text-[11px] mt-0.5 text-emerald-400/70">Message ID: {messageId}</div>
           {deliveryInfo?.redirected && (
-            <div className="mt-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
-              Test mode: rerouted to <span className="font-mono">{deliveryInfo.actualTo}</span> (original recipient: {candidateEmail})
+            <div className="mt-1.5 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg px-2 py-1">
+              Test mode: rerouted to <span className="font-mono">{deliveryInfo.actualTo}</span> (original: {candidateEmail})
             </div>
           )}
         </div>
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3 mb-3 text-xs text-red-700">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 mb-3 text-xs text-red-300">
           {error}
         </div>
       )}
@@ -105,15 +105,15 @@ export default function OutreachCard({
         <button
           onClick={handleSendEmail}
           disabled={sent || sending}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition"
+          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
-          {sent ? "✓ Sent" : sending ? "Sending..." : "Send Email"}
+          {sent ? "Sent" : sending ? "Sending..." : "Send Email"}
         </button>
         <button
           onClick={copyLink}
-          className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition"
+          className="rounded-lg border border-cardborder px-4 py-2 text-sm font-medium text-muted hover:text-fg hover:bg-cardhover transition"
         >
-          {copied ? "✓ Copied" : "Copy Availability Link"}
+          {copied ? "Copied!" : "Copy Availability Link"}
         </button>
       </div>
     </div>

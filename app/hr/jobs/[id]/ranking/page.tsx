@@ -17,28 +17,22 @@ export default async function RankingPage({
   return (
     <div>
       <div className="mb-4">
-        <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900">
-          ← Dashboard
+        <Link href="/hr" className="text-sm text-muted hover:text-fg transition">
+          &larr; Dashboard
         </Link>
       </div>
 
       <div className="flex items-end justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{job.title}</h1>
-          <p className="text-neutral-500 mt-1">Ranked candidates from the screening agent.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-fg">{job.title}</h1>
+          <p className="text-muted mt-1">Ranked candidates from the screening agent.</p>
         </div>
         <div className="flex gap-2">
           <Link
-            href={`/jobs/${job.id}`}
-            className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition"
+            href={`/hr/jobs/${job.id}/schedule`}
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90 transition shadow-[0_0_20px_rgba(108,92,231,0.2)]"
           >
-            Apply Link
-          </Link>
-          <Link
-            href={`/jobs/${job.id}/schedule`}
-            className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 transition"
-          >
-            Go to Schedule →
+            Go to Schedule &rarr;
           </Link>
         </div>
       </div>
