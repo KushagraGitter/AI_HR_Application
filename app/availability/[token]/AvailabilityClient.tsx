@@ -45,6 +45,7 @@ export default function AvailabilityClient({ token }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [confirmedSlot, setConfirmedSlot] = useState<{ panelMember: string; slot: string } | null>(null)
   const [error, setError] = useState("")
 
   const slots = generateSlots()
@@ -86,9 +87,15 @@ export default function AvailabilityClient({ token }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, slots: [...selected] }),
       })
+      const body = await res.json()
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
         throw new Error(body.error ?? "Submission failed")
+      }
+      if (body.autopilot?.scheduled) {
+        setConfirmedSlot({
+          panelMember: body.autopilot.panelMember,
+          slot: body.autopilot.slot,
+        })
       }
       setSubmitted(true)
     } catch (err) {
@@ -112,13 +119,44 @@ export default function AvailabilityClient({ token }: Props) {
   }
 
   if (submitted) {
+    const formattedSlot = confirmedSlot
+      ? new Date(confirmedSlot.slot).toLocaleString("en-US", {
+          weekday: "long",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : null
+
     return (
-      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center mt-12">
-        <div className="text-4xl mb-3 text-emerald-400">&#10003;</div>
-        <h1 className="text-xl font-semibold text-emerald-300 mb-2">Thank you, {info?.candidateName}</h1>
-        <p className="text-sm text-emerald-400/80">
-          We have received your availability. We will confirm your interview slot shortly via email.
-        </p>
+      <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center mt-12">
+        <div className="text-4xl mb-3">✓</div>
+        <h1 className="text-xl font-semibold text-green-900 mb-2">Thank you, {info?.candidateName}</h1>
+        {confirmedSlot ? (
+          <div>
+            <p className="text-sm text-green-800 mb-4">
+              Your interview has been automatically scheduled.
+            </p>
+            <div className="inline-block rounded-md bg-white border border-green-200 px-5 py-3 text-left">
+              <div className="text-xs uppercase tracking-wider text-neutral-500 mb-1">
+                Confirmed Interview
+              </div>
+              <div className="text-sm font-semibold text-neutral-900">{formattedSlot}</div>
+              <div className="text-sm text-neutral-600 mt-0.5">
+                with <span className="font-medium">{confirmedSlot.panelMember}</span>
+              </div>
+            </div>
+            <p className="text-xs text-green-700 mt-4">
+              A calendar invite will follow. Please reply to that email if anything changes.
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-green-800">
+            We have received your availability. We will confirm your interview slot shortly.
+          </p>
+        )}
       </div>
     )
   }

@@ -16,6 +16,19 @@ interface Props {
   onBulkDraft: () => void
   onScheduleAll: () => void
   actionLoading: string
+  autoRefresh?: boolean
+  onToggleAutoRefresh?: () => void
+  lastUpdate?: Date | null
+}
+
+function formatTimestamp(iso?: string): string {
+  if (!iso) return ""
+  try {
+    const d = new Date(iso)
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`
+  } catch {
+    return ""
+  }
 }
 
 const AGENTS = [
@@ -53,6 +66,9 @@ export default function AgentPanel({
   onBulkDraft,
   onScheduleAll,
   actionLoading,
+  autoRefresh = true,
+  onToggleAutoRefresh,
+  lastUpdate,
 }: Props) {
   const scoredCount = candidates.filter((c) => c.status === "scored").length
   const eligibleCount = candidates.filter((c) => c.status === "scored" && c.score >= minScore).length
@@ -63,6 +79,30 @@ export default function AgentPanel({
 
   return (
     <div className="p-4 space-y-5">
+      {/* Live status bar */}
+      <div className="flex items-center justify-between rounded-xl bg-neutral-950/60 border border-cardborder px-3 py-2">
+        <div className="flex items-center gap-2">
+          <span
+            className={`h-2 w-2 rounded-full ${autoRefresh ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`}
+          />
+          <span className="text-[11px] font-mono font-semibold text-fg">
+            {autoRefresh ? "LIVE" : "PAUSED"}
+          </span>
+          <span className="text-[10px] font-mono text-muted">
+            · {lastUpdate ? formatTimestamp(lastUpdate.toISOString()) : "--:--:--"}
+          </span>
+        </div>
+        {onToggleAutoRefresh && (
+          <button
+            onClick={onToggleAutoRefresh}
+            className="text-[10px] font-mono text-muted hover:text-fg px-2 py-0.5 rounded"
+            title={autoRefresh ? "Pause auto-refresh" : "Resume auto-refresh"}
+          >
+            {autoRefresh ? "❚❚ pause" : "▶ resume"}
+          </button>
+        )}
+      </div>
+
       {/* Settings */}
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">
@@ -175,31 +215,6 @@ export default function AgentPanel({
         </div>
       </div>
 
-      {/* Trace Timeline */}
-      {traceNodes.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">
-            Execution Log
-          </h3>
-          <div className="relative space-y-3">
-            <div className="absolute left-[5px] top-1 bottom-1 w-px bg-cardborder" />
-            {traceNodes.map((node, i) => (
-              <div key={i} className="relative pl-5">
-                <div className="absolute left-0 top-1 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-card" />
-                <div className="flex items-center justify-between gap-1">
-                  <code className="text-[10px] font-mono font-semibold text-accentlt">{node.nodeName}</code>
-                  <span className="text-[9px] font-mono text-muted bg-surface px-1 py-0.5 rounded">
-                    {node.durationMs}ms
-                  </span>
-                </div>
-                <p className="text-[10px] text-muted truncate mt-0.5" title={node.outputSummary}>
-                  {node.outputSummary}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

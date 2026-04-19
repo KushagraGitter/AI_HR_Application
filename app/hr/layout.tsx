@@ -8,7 +8,7 @@ export default function HRLayout({
   return (
     <div className="mesh-bg min-h-screen flex flex-col">
       <nav className="border-b border-cardborder bg-card/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="w-full px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="text-sm text-muted hover:text-fg transition">
               &larr; Home
@@ -36,7 +36,7 @@ export default function HRLayout({
           </div>
         </div>
       </nav>
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
+      <main className="flex-1 w-full px-6 py-8 flex flex-col min-h-0">
         {children}
       </main>
     </div>

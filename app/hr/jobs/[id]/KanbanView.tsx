@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import AgentPanel from "./AgentPanel"
 import KanbanBoard from "./KanbanBoard"
 import CandidateModal from "./CandidateModal"
+import ActivityLogPanel from "./ActivityLogPanel"
 import type { AgentTraceNode } from "@/types"
 
 interface CandidateData {
@@ -37,6 +38,8 @@ export default function KanbanView({ jobId, jobTitle }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [minScore, setMinScore] = useState(70)
   const [actionLoading, setActionLoading] = useState("")
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
 
   const loadData = useCallback(async () => {
     try {
@@ -48,6 +51,7 @@ export default function KanbanView({ jobId, jobTitle }: Props) {
       const traceData = await traceRes.json()
       setCandidates(candidatesData)
       setTraceNodes(traceData.nodes ?? [])
+      setLastUpdate(new Date())
     } catch {
       console.error("Failed to load data")
     } finally {
@@ -56,6 +60,13 @@ export default function KanbanView({ jobId, jobTitle }: Props) {
   }, [jobId])
 
   useEffect(() => { loadData() }, [loadData])
+
+  // Auto-refresh every 2s so HR sees statuses flip + new logs in real-time
+  useEffect(() => {
+    if (!autoRefresh) return
+    const interval = setInterval(loadData, 2000)
+    return () => clearInterval(interval)
+  }, [loadData, autoRefresh])
 
   const selectedCandidate = candidates.find((c) => c.id === selectedId) ?? null
 
@@ -135,8 +146,8 @@ export default function KanbanView({ jobId, jobTitle }: Props) {
   }
 
   return (
-    <div className="flex flex-1 gap-0 overflow-hidden rounded-t-2xl border border-cardborder bg-card/30">
-      {/* Agent Panel - Left 20% */}
+    <div className="flex flex-1 gap-0 overflow-hidden rounded-t-2xl border border-cardborder bg-card/30 min-w-0 min-h-0">
+      {/* Agent Panel - Left fixed */}
       <div className="w-[280px] shrink-0 border-r border-cardborder bg-card/60 overflow-y-auto">
         <AgentPanel
           traceNodes={traceNodes}
@@ -146,16 +157,29 @@ export default function KanbanView({ jobId, jobTitle }: Props) {
           onBulkDraft={handleBulkDraftOutreach}
           onScheduleAll={handleScheduleAll}
           actionLoading={actionLoading}
+          autoRefresh={autoRefresh}
+          onToggleAutoRefresh={() => setAutoRefresh((v) => !v)}
+          lastUpdate={lastUpdate}
         />
       </div>
 
-      {/* Kanban Board - Right 80% */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden">
+      {/* Kanban Board - fills remaining width, 6 equal columns */}
+      <div className="flex-1 min-w-0 overflow-hidden">
         <KanbanBoard
           candidates={candidates}
           loading={loading}
           minScore={minScore}
           onCardClick={setSelectedId}
+        />
+      </div>
+
+      {/* Activity Log - Right fixed */}
+      <div className="w-[420px] shrink-0 border-l border-cardborder p-3 bg-card/30">
+        <ActivityLogPanel
+          traceNodes={traceNodes}
+          autoRefresh={autoRefresh}
+          lastUpdate={lastUpdate}
+          onToggleAutoRefresh={() => setAutoRefresh((v) => !v)}
         />
       </div>
 

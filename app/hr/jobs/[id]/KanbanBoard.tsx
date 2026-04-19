@@ -59,12 +59,12 @@ export default function KanbanBoard({ candidates, loading, minScore, onCardClick
   }
 
   return (
-    <div className="flex h-full gap-3 p-3">
+    <div className="grid grid-cols-6 h-full gap-3 p-3 min-w-0">
       {COLUMNS.map((col) => {
         const items = candidates.filter((c) => c.status === col.key)
 
         return (
-          <div key={col.key} className="flex flex-col w-[220px] shrink-0">
+          <div key={col.key} className="flex flex-col min-w-0 min-h-0">
             {/* Column header */}
             <div className={`flex items-center gap-2 px-3 py-2 mb-2 rounded-lg border ${col.accent} bg-surface`}>
               <div className={`h-2.5 w-2.5 rounded-full ${col.color}`} />

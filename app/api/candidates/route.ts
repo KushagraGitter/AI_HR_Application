@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { buildScoringGraph } from "@/lib/agent/graph"
+import { autopilotAfterScore } from "@/lib/agent/autopilot"
+import { log, demoDelay } from "@/lib/agent/logger"
 import type { ScoredCandidate } from "@/types"
 
 // POST /api/candidates — submit a candidate + trigger scoring
@@ -20,6 +22,32 @@ export async function POST(req: NextRequest) {
     // Save candidate first
     const candidate = await prisma.candidate.create({
       data: { jobId, name, email, resume, linkedinUrl: linkedinUrl ?? "", githubUrl: githubUrl ?? "" },
+    })
+
+    await log({
+      jobId,
+      icon: "📥",
+      level: "success",
+      actor: "candidate",
+      message: `New application received from ${name} (${email})`,
+    })
+    await demoDelay()
+
+    await log({
+      jobId,
+      icon: "🤖",
+      level: "action",
+      actor: "screener",
+      message: `Screener agent activated`,
+    })
+    await demoDelay()
+
+    await log({
+      jobId,
+      icon: "🧠",
+      level: "action",
+      actor: "screener",
+      message: `Analyzing resume against job description (${job.jd.length} chars)...`,
     })
 
     // Run scoring graph with this single candidate
@@ -57,6 +85,15 @@ export async function POST(req: NextRequest) {
       },
     })
 
+    await log({
+      jobId,
+      icon: scored.score >= 85 ? "🌟" : scored.score >= 70 ? "✓" : "⚠️",
+      level: scored.score >= 70 ? "success" : "warn",
+      actor: "screener",
+      message: `Scored ${scored.score}/100 — ${scored.reasoning.slice(0, 120)}${scored.reasoning.length > 120 ? "..." : ""}`,
+    })
+    await demoDelay()
+
     // Append trace to existing trace record for this job (or create new)
     if (result.trace?.length > 0) {
       const existingTrace = await prisma.agentTrace.findFirst({ where: { jobId } })
@@ -73,7 +110,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ ...updated, criteriaBreakdown: scored.criteriaBreakdown })
+    // AUTOPILOT — if score clears threshold, auto-draft + auto-send outreach
+    const origin =
+      req.headers.get("origin") ||
+      `http://${req.headers.get("host") ?? "localhost:3000"}`
+    const autopilot = await autopilotAfterScore(candidate.id, origin)
+
+    // Re-fetch the candidate so the response has the latest status
+    const finalCandidate = await prisma.candidate.findUnique({ where: { id: candidate.id } })
+
+    return NextResponse.json({
+      ...(finalCandidate ?? updated),
+      criteriaBreakdown: scored.criteriaBreakdown,
+      autopilot,
+    })
   } catch (error) {
     console.error("POST /api/candidates error:", error)
     return NextResponse.json({ error: "Failed to submit candidate" }, { status: 500 })

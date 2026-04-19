@@ -2,13 +2,13 @@
 
 ## TL;DR
 
-The agent replaces **three human HR roles** — Screener, Outreacher, Scheduler — all reporting to an HR Manager. It runs as **5 LangGraph nodes** composed into **4 triggerable subgraphs**, each firing at a different stage of the hiring funnel.
+The agent replaces **three human HR roles** — Screener, Outreacher, Scheduler — all reporting to an HR Manager. It runs as **5 LangGraph nodes** composed into **4 triggerable subgraphs**, chained together by an **autopilot orchestrator** that makes the pipeline fully autonomous end-to-end.
 
 ```
-HR Input → [Agent runs] → Real Output (ranked shortlist, drafted email, .ics file)
+HR writes job → [Autopilot runs everything else] → Interview scheduled
 ```
 
-No human writes a JD, scores a resume, drafts outreach, or picks interview slots.
+**HR Manager clicks exactly 2 buttons:** "Create Job" and "Send the apply link." Everything else — scoring, shortlisting, emailing the candidate, collecting availability, scheduling with a panel member — happens automatically.
 
 ---
 
@@ -24,33 +24,42 @@ No human writes a JD, scores a resume, drafts outreach, or picks interview slots
 
 ---
 
-## High-Level Flow
+## High-Level Autonomous Flow
 
 ```mermaid
 flowchart TD
     HR([HR Manager])
     Cand([Candidate])
+    AUTO[[Autopilot Orchestrator]]
 
-    HR -->|1. Enter title + requirements| A1[generate_jd node]
+    HR -->|1. Enter title + requirements| A1[generate_jd]
     A1 -->|Generated JD| HR
-    HR -->|2. Shares public apply link| Cand
-    Cand -->|3. Submits resume| A2[score_resume node]
-    A2 --> A3[rank_and_shortlist node]
-    A3 -->|Ranked list| HR
-    HR -->|4. Shortlists top N + clicks Draft Outreach| A4[draft_outreach node]
-    A4 -->|Personalized email + availability link| HR
-    HR -->|5. Copies link, sends email| Cand
-    Cand -->|6. Selects available slots| DB[(SQLite)]
-    HR -->|7. Clicks Schedule All| A5[assign_slots node]
-    A5 -->|Panel assignment + .ics file| HR
-    HR -->|8. Downloads .ics| Calendar([Calendar Invite])
+    HR -->|2. Shares apply link| Cand
+
+    Cand -->|3. Submits resume| A2[score_resume]
+    A2 --> A3[rank_and_shortlist]
+    A3 -->|score ≥ 70| AUTO
+
+    AUTO -->|auto-triggers| A4[draft_outreach]
+    A4 --> SEND[send_email via Resend]
+    SEND -->|Email with availability link| Cand
+
+    Cand -->|4. Clicks link, selects slots| AUTO
+    AUTO -->|auto-triggers| A5[assign_slots]
+    A5 -->|panel + slot + .ics| Cand
+    A5 -.->|status: scheduled| HR
 
     style A1 fill:#1e293b,color:#fff
     style A2 fill:#1e293b,color:#fff
     style A3 fill:#1e293b,color:#fff
     style A4 fill:#1e293b,color:#fff
     style A5 fill:#1e293b,color:#fff
+    style SEND fill:#7c3aed,color:#fff
+    style AUTO fill:#a855f7,color:#fff
 ```
+
+**What HR does:** Step 1 and 2 only.
+**What happens automatically:** Steps 3-4 are fully hands-off. HR watches statuses flip on the ranking page.
 
 ---
 
@@ -88,18 +97,29 @@ flowchart LR
 
 ---
 
-## 4 Composable Subgraphs
+## 4 Composable Subgraphs + Autopilot Orchestrator
 
-Instead of one monolithic graph, we compose **4 subgraphs** triggered independently by the UI. This keeps each API call fast and the state small.
+Instead of one monolithic graph, we compose **4 subgraphs** invoked either by the UI directly or by the autopilot orchestrator.
 
-| Subgraph | Triggered by UI | Nodes | Average runtime |
+| Subgraph | Trigger | Nodes | Average runtime |
 |---|---|---|---|
 | **`buildJdGraph`** | HR submits New Job form | `generate_jd` | ~2s |
 | **`buildScoringGraph`** | Candidate submits application | `score_resume` → `rank_and_shortlist` | ~3s per candidate |
-| **`buildOutreachGraph`** | HR clicks "Draft Outreach" | `draft_outreach` | ~2s per candidate |
-| **`buildSchedulingGraph`** | HR clicks "Schedule All" | `assign_slots` | ~50ms (no LLM) |
+| **`buildOutreachGraph`** | Autopilot (or manual override) after scoring | `draft_outreach` | ~2s per candidate |
+| **`buildSchedulingGraph`** | Autopilot after availability received | `assign_slots` | ~50ms (no LLM) |
 
 All 4 graphs share the same `HRAgentAnnotation` state shape — see `lib/agent/state.ts`.
+
+### Autopilot Orchestrator (`lib/agent/autopilot.ts`)
+
+Two chain functions invoked directly from API route handlers after the primary work completes:
+
+| Function | When it runs | What it chains |
+|---|---|---|
+| `autopilotAfterScore(candidateId, origin)` | End of `POST /api/candidates` if score ≥ 70 | `buildOutreachGraph` → `sendOutreachEmail` (Resend) |
+| `autopilotAfterAvailability(candidateId)` | End of `POST /api/availability` | `buildSchedulingGraph` for the single candidate |
+
+Both functions **never throw** — they return status objects so a failure in one candidate does not poison the HTTP response. Errors are logged but the candidate stays in the funnel for manual intervention.
 
 ---
 

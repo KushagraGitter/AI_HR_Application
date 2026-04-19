@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import CandidateCard from "@/components/CandidateCard"
 import OutreachCard from "@/components/OutreachCard"
-import TracePanel from "@/components/TracePanel"
+import LiveLogPanel from "@/components/LiveLogPanel"
 import type { ScoredCandidate } from "@/types"
 
 interface DbCandidate extends ScoredCandidate {
@@ -21,7 +21,6 @@ export default function RankingClient({ jobId }: Props) {
   const [loading, setLoading] = useState(true)
   const [drafting, setDrafting] = useState(false)
   const [error, setError] = useState("")
-  const [traceRefresh, setTraceRefresh] = useState(0)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -37,6 +36,13 @@ export default function RankingClient({ jobId }: Props) {
   }, [jobId])
 
   useEffect(() => { load() }, [load])
+
+  // Poll candidates every 2s so HR sees statuses flip as autopilot progresses.
+  // The LiveLogPanel polls its own trace endpoint at 1s.
+  useEffect(() => {
+    const interval = setInterval(load, 2000)
+    return () => clearInterval(interval)
+  }, [load])
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -62,7 +68,6 @@ export default function RankingClient({ jobId }: Props) {
         throw new Error(body.error ?? "Draft failed")
       }
       await load()
-      setTraceRefresh((k) => k + 1)
       setSelected(new Set())
     } catch (err) {
       setError(err instanceof Error ? err.message : "Draft failed")
@@ -74,8 +79,20 @@ export default function RankingClient({ jobId }: Props) {
   const withDrafts = candidates.filter((c) => c.emailDraft && c.availabilityToken)
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-6">
       <div className="space-y-6">
+        <div className="rounded-lg border border-purple-200 bg-purple-50 p-4 flex items-start gap-3">
+          <div className="mt-0.5 h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-purple-900">Autopilot On</p>
+            <p className="text-xs text-purple-800 mt-0.5">
+              Candidates scoring ≥ 70 are automatically emailed with an availability link.
+              When they submit slots, the scheduler assigns a panel member and confirms instantly.
+              No HR action required until final approval.
+            </p>
+          </div>
+        </div>
+
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">
@@ -84,13 +101,14 @@ export default function RankingClient({ jobId }: Props) {
             <button
               onClick={handleDraftOutreach}
               disabled={selected.size === 0 || drafting}
-              className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition"
+              className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:bg-neutral-100 disabled:text-neutral-400 disabled:cursor-not-allowed transition"
+              title="Manual override — normally autopilot handles this"
             >
               {drafting
                 ? "Agent is drafting..."
                 : selected.size === 0
-                ? "Draft Outreach for Selected"
-                : `Draft Outreach for ${selected.size} Selected`}
+                ? "Manual Draft (override)"
+                : `Manual Draft for ${selected.size}`}
             </button>
           </div>
 
@@ -144,7 +162,7 @@ export default function RankingClient({ jobId }: Props) {
       </div>
 
       <aside>
-        <TracePanel jobId={jobId} refreshKey={traceRefresh} />
+        <LiveLogPanel jobId={jobId} pollMs={1000} />
       </aside>
     </div>
   )

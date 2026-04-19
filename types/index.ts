@@ -58,6 +58,12 @@ export interface AgentTraceNode {
   inputSummary: string
   outputSummary: string
   durationMs: number
+  // Demo enrichment fields (optional for backwards compat with old records)
+  timestamp?: string  // ISO
+  level?: "info" | "action" | "success" | "warn" | "error"
+  icon?: string       // emoji
+  message?: string    // short human-readable message (preferred for display)
+  actor?: "system" | "screener" | "outreacher" | "scheduler" | "candidate" | "hr"
 }
 
 export interface HRAgentState {

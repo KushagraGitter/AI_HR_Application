@@ -38,7 +38,7 @@ export default function NewJobPage() {
 
   if (job) {
     return (
-      <div className="max-w-3xl">
+      <div className="max-w-3xl w-full mx-auto">
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 mb-6">
           <p className="text-sm font-medium text-emerald-300">
             Job created successfully. The AI agent generated the job description below.
@@ -83,7 +83,7 @@ export default function NewJobPage() {
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl w-full mx-auto">
       <h1 className="text-3xl font-bold tracking-tight text-fg mb-2">Create New Job</h1>
       <p className="text-muted mb-8">
         Provide a title and key requirements. The AI agent will generate a comprehensive job description

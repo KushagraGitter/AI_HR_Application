@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { buildJdGraph } from "@/lib/agent/graph"
+import { log } from "@/lib/agent/logger"
 
 // POST /api/jobs — create job + generate JD
 export async function POST(req: NextRequest) {
@@ -14,6 +15,28 @@ export async function POST(req: NextRequest) {
     // Create job first so we have an ID
     const job = await prisma.job.create({
       data: { title, requirements },
+    })
+
+    await log({
+      jobId: job.id,
+      icon: "🎯",
+      level: "success",
+      actor: "hr",
+      message: `New job created: "${title}"`,
+    })
+    await log({
+      jobId: job.id,
+      icon: "🤖",
+      level: "action",
+      actor: "system",
+      message: `JD writer agent activated`,
+    })
+    await log({
+      jobId: job.id,
+      icon: "✍️",
+      level: "action",
+      actor: "system",
+      message: `Generating job description from requirements...`,
     })
 
     // Run the JD generation graph
@@ -30,15 +53,28 @@ export async function POST(req: NextRequest) {
       data: { jd: result.jd },
     })
 
-    // Save trace
-    if (result.trace?.length > 0) {
-      await prisma.agentTrace.create({
-        data: {
-          jobId: job.id,
-          nodes: JSON.stringify(result.trace),
-        },
+    // Save trace nodes from the graph itself
+    for (const node of result.trace ?? []) {
+      await log({
+        jobId: job.id,
+        icon: "✓",
+        level: "success",
+        actor: "system",
+        nodeName: node.nodeName,
+        inputSummary: node.inputSummary,
+        outputSummary: node.outputSummary,
+        durationMs: node.durationMs,
+        message: `JD ready (${result.jd.length} chars) · ${node.durationMs}ms`,
       })
     }
+
+    await log({
+      jobId: job.id,
+      icon: "⏳",
+      level: "info",
+      actor: "system",
+      message: `Ready to receive applications. Share the apply link.`,
+    })
 
     return NextResponse.json(updated)
   } catch (error) {
