@@ -1,6 +1,108 @@
 "use client"
 
+import { useState, useRef, useEffect } from "react"
 import type { AgentTraceNode } from "@/types"
+
+const EVAL_CRITERIA = [
+  {
+    name: "Technical Skills Match",
+    description: "How well the candidate's technical skills (languages, frameworks, tools) align with the job requirements.",
+  },
+  {
+    name: "Experience Level",
+    description: "Years and depth of relevant experience compared to the minimum and preferred requirements.",
+  },
+  {
+    name: "System Design & Architecture",
+    description: "Evidence of architectural thinking, scalability awareness, and design decision-making in past roles or projects.",
+  },
+  {
+    name: "Communication & Leadership",
+    description: "Signals of written/verbal communication quality, mentorship, team leadership, and public presence (talks, open source).",
+  },
+]
+
+function InfoTooltip() {
+  const [open, setOpen] = useState(false)
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 })
+
+  useEffect(() => {
+    if (!open) return
+    function handleClick(e: MouseEvent) {
+      if (
+        panelRef.current && !panelRef.current.contains(e.target as Node) &&
+        btnRef.current && !btnRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [open])
+
+  function handleToggle() {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 6, left: rect.left })
+    }
+    setOpen(!open)
+  }
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        onClick={handleToggle}
+        className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-cardborder text-muted hover:bg-accent/30 hover:text-accentlt transition"
+        aria-label="Scoring criteria info"
+      >
+        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          ref={panelRef}
+          className="fixed z-[100] w-72 rounded-xl border border-cardborder bg-card shadow-2xl shadow-black/40 p-4"
+          style={{ top: pos.top, left: pos.left }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-semibold text-fg">Evaluation Criteria</h4>
+            <button onClick={() => setOpen(false)} className="text-muted hover:text-fg">
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <p className="text-[10px] text-muted mb-3">
+            The AI screening agent evaluates each candidate on these 4 parameters, scoring each 0-100. The overall score is a weighted average.
+          </p>
+          <div className="space-y-2.5">
+            {EVAL_CRITERIA.map((c, i) => (
+              <div key={i}>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-[10px] font-mono text-accentlt bg-accent/15 rounded px-1 py-0.5">
+                    {i + 1}
+                  </span>
+                  <span className="text-[11px] font-semibold text-fg">{c.name}</span>
+                </div>
+                <p className="text-[10px] text-muted leading-relaxed pl-5">{c.description}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-cardborder">
+            <p className="text-[9px] text-muted/70">
+              Criteria are extracted from the job description by the AI agent. The exact weighting adapts to the role requirements.
+            </p>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
 
 interface CandidateData {
   id: string
@@ -109,9 +211,12 @@ export default function AgentPanel({
           Settings
         </h3>
         <div className="rounded-xl bg-surface border border-cardborder p-3">
-          <label className="block text-xs font-medium text-fg/70 mb-2">
-            Minimum Score Threshold
-          </label>
+          <div className="flex items-center gap-1.5 mb-2">
+            <label className="text-xs font-medium text-fg/70">
+              Minimum Score Threshold
+            </label>
+            <InfoTooltip />
+          </div>
           <div className="flex items-center gap-3">
             <input
               type="range"
