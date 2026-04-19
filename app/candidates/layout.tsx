@@ -27,6 +27,12 @@ export default function CandidateLayout({
             >
               All Jobs
             </Link>
+            <Link
+              href="/candidates/applications"
+              className="rounded-lg bg-accent/15 text-accentlt px-3 py-2 text-sm font-medium hover:bg-accent/25 ring-1 ring-accent/20 transition"
+            >
+              My Applications
+            </Link>
           </div>
         </div>
       </nav>
