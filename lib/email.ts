@@ -42,7 +42,7 @@ export async function sendOutreachEmail({
   bodyText,
 }: SendOutreachArgs): Promise<SendResult> {
   const resend = getResend()
-  const from = process.env.RESEND_FROM_EMAIL ?? "AI HR Agent <onboarding@resend.dev>"
+  const from = process.env.RESEND_FROM_EMAIL ?? "Siftly <onboarding@resend.dev>"
 
   // Free-tier Resend only permits sending to the account owner email.
   // If RESEND_TEST_REDIRECT_TO is set, reroute all mail there and surface the intended recipient.
@@ -67,8 +67,8 @@ export async function sendOutreachEmail({
     text: finalBody,
     html: plainTextToHtml(finalBody),
     headers: {
-      "X-AI-HR-Agent-Candidate": candidateName,
-      "X-AI-HR-Agent-Intended-To": to,
+      "X-Siftly-Candidate": candidateName,
+      "X-Siftly-Intended-To": to,
     },
   })
 

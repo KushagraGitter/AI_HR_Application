@@ -15,9 +15,10 @@ export default function HRLayout({
             </Link>
             <Link href="/hr" className="flex items-center gap-2">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/20 text-accentlt text-sm font-bold ring-1 ring-accent/30">
-                HR
+                S
               </span>
-              <span className="font-semibold tracking-tight text-fg">HR Manager</span>
+              <span className="font-semibold tracking-tight text-fg">Siftly</span>
+              <span className="text-xs text-muted ml-2 hidden sm:inline">HR Manager</span>
             </Link>
           </div>
           <div className="flex items-center gap-3">

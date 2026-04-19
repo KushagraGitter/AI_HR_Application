@@ -48,3 +48,14 @@ model AgentTrace {
   nodes     String   @default("[]")
   createdAt DateTime @default(now())
 }
+
+model Waitlist {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  name       String   @default("")
+  role       String   @default("")
+  company    String   @default("")
+  useCase    String   @default("")
+  source     String   @default("")
+  createdAt  DateTime @default(now())
+}

@@ -14,7 +14,7 @@ export function getLLM() {
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
         "HTTP-Referer": "http://localhost:3000",
-        "X-Title": "AI HR Agent",
+        "X-Title": "Siftly",
       },
     },
   })

@@ -53,7 +53,7 @@ Education: B.Tech Computer Science, IIT Delhi
 `
 
 async function main() {
-  console.log("=== AI HR Agent — Iteration 0 Test ===\n")
+  console.log("=== Siftly — Iteration 0 Test ===\n")
   console.log("Testing LLM connection via OpenRouter...")
   console.log(`Model: ${process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini"}\n`)
 
@@ -72,7 +72,7 @@ async function main() {
       baseURL: "https://openrouter.ai/api/v1",
       defaultHeaders: {
         "HTTP-Referer": "http://localhost:3000",
-        "X-Title": "AI HR Agent",
+        "X-Title": "Siftly",
       },
     },
   })

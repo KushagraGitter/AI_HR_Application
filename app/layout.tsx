@@ -13,8 +13,23 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "AI HR Platform",
-  description: "AI-powered recruitment — screening, outreach, scheduling",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ??
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
+  ),
+  title: {
+    default: "Siftly — Your HR team, on autopilot",
+    template: "%s · Siftly",
+  },
+  description:
+    "Autonomous AI agents that score resumes, send outreach, and schedule interviews. Zero manual clicks.",
+  openGraph: {
+    siteName: "Siftly",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 }
 
 export default function RootLayout({

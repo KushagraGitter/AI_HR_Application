@@ -20,7 +20,7 @@ function addMinutes(iso: string, minutes: number): string {
 
 export function generateIcs(options: IcsOptions): string {
   const { title, start, durationMinutes, organizer, attendee, attendeeEmail } = options
-  const uid = `${Date.now()}-${Math.random().toString(36).slice(2)}@aihr.local`
+  const uid = `${Date.now()}-${Math.random().toString(36).slice(2)}@siftly.local`
   const now = toIcsDate(new Date().toISOString())
   const dtStart = toIcsDate(start)
   const dtEnd = addMinutes(start, durationMinutes)
@@ -28,7 +28,7 @@ export function generateIcs(options: IcsOptions): string {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//AI HR Agent//EN",
+    "PRODID:-//Siftly//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:REQUEST",
     "BEGIN:VEVENT",
@@ -39,7 +39,7 @@ export function generateIcs(options: IcsOptions): string {
     `SUMMARY:${title}`,
     `ORGANIZER;CN=${organizer}:mailto:hr@company.com`,
     `ATTENDEE;CN=${attendee};RSVP=TRUE:mailto:${attendeeEmail}`,
-    "DESCRIPTION:Interview scheduled via AI HR Agent",
+    "DESCRIPTION:Interview scheduled via Siftly",
     "STATUS:CONFIRMED",
     "END:VEVENT",
     "END:VCALENDAR",
