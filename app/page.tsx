@@ -1,65 +1,93 @@
-import Image from "next/image";
+import Link from "next/link"
+import { prisma } from "@/lib/prisma"
+import StatusBadge from "@/components/StatusBadge"
 
-export default function Home() {
+export const dynamic = "force-dynamic"
+
+export default async function DashboardPage() {
+  const jobs = await prisma.job.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      candidates: { select: { status: true } },
+    },
+  })
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      <div className="flex items-end justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-neutral-500 mt-1">All jobs and candidate pipeline status.</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </div>
+
+      {jobs.length === 0 ? (
+        <div className="rounded-lg border-2 border-dashed border-neutral-300 bg-white p-12 text-center">
+          <p className="text-neutral-600 mb-4">No jobs yet. Create your first one to see the agent in action.</p>
+          <Link
+            href="/jobs/new"
+            className="inline-block rounded-md bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            + Create Your First Job
+          </Link>
         </div>
-      </main>
+      ) : (
+        <div className="space-y-4">
+          {jobs.map((job) => {
+            const counts: Record<string, number> = {}
+            for (const c of job.candidates) counts[c.status] = (counts[c.status] ?? 0) + 1
+            const total = job.candidates.length
+
+            return (
+              <div
+                key={job.id}
+                className="rounded-lg border border-neutral-200 bg-white p-6 hover:border-neutral-300 transition"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h2 className="text-lg font-semibold">{job.title}</h2>
+                    <p className="text-sm text-neutral-500 mt-0.5">
+                      {total} {total === 1 ? "candidate" : "candidates"} · Created{" "}
+                      {new Date(job.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/jobs/${job.id}`}
+                      className="text-sm text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-md border border-neutral-200 hover:bg-neutral-50"
+                    >
+                      Apply Link
+                    </Link>
+                    <Link
+                      href={`/jobs/${job.id}/ranking`}
+                      className="text-sm text-white bg-neutral-900 hover:bg-neutral-800 px-3 py-1.5 rounded-md"
+                    >
+                      View Rankings →
+                    </Link>
+                    <Link
+                      href={`/jobs/${job.id}/schedule`}
+                      className="text-sm text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-md"
+                    >
+                      Schedule
+                    </Link>
+                  </div>
+                </div>
+
+                {total > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-3 border-t border-neutral-100">
+                    {Object.entries(counts).map(([status, count]) => (
+                      <div key={status} className="flex items-center gap-1.5">
+                        <StatusBadge status={status} />
+                        <span className="text-sm font-medium text-neutral-700">{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
-  );
+  )
 }

@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Job {
+  id           String      @id @default(cuid())
+  title        String
+  requirements String
+  jd           String      @default("")
+  createdAt    DateTime    @default(now())
+  candidates   Candidate[]
+  traces       AgentTrace[]
+}
+
+model Candidate {
+  id                String   @id @default(cuid())
+  jobId             String
+  job               Job      @relation(fields: [jobId], references: [id])
+  name              String
+  email             String
+  resume            String
+  linkedinUrl       String   @default("")
+  githubUrl         String   @default("")
+  status            String   @default("applied")
+  score             Int      @default(0)
+  reasoning         String   @default("")
+  criteriaBreakdown String   @default("[]")
+  emailDraft        String   @default("")
+  availabilityToken String   @default("")
+  availabilitySlots String   @default("[]")
+  scheduledSlot     String   @default("")
+  scheduledPanel    String   @default("")
+  icsFile           String   @default("")
+  createdAt         DateTime @default(now())
+}
+
+model AgentTrace {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id])
+  nodes     String   @default("[]")
+  createdAt DateTime @default(now())
+}
