@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendOutreachEmail } from "@/lib/email"
+import { getOrigin } from "@/lib/origin"
 
 // POST /api/outreach/send — actually send the drafted outreach email via Resend
 export async function POST(req: NextRequest) {
@@ -28,13 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Build the final email body with the live availability URL
-    const origin =
-      req.headers.get("origin") ||
-      req.headers.get("x-forwarded-host") ||
-      "http://localhost:3000"
-    const availabilityUrl = origin.startsWith("http")
-      ? `${origin}/availability/${candidate.availabilityToken}`
-      : `https://${origin}/availability/${candidate.availabilityToken}`
+    const availabilityUrl = `${getOrigin(req)}/availability/${candidate.availabilityToken}`
 
     const bodyText = candidate.emailDraft.replace(/\[AVAILABILITY_LINK\]/g, availabilityUrl)
 

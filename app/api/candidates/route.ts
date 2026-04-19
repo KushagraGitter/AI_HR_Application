@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { buildScoringGraph } from "@/lib/agent/graph"
 import { autopilotAfterScore } from "@/lib/agent/autopilot"
 import { log, demoDelay } from "@/lib/agent/logger"
+import { getOrigin } from "@/lib/origin"
 import type { ScoredCandidate } from "@/types"
 
 // POST /api/candidates — submit a candidate + trigger scoring
@@ -111,10 +112,7 @@ export async function POST(req: NextRequest) {
     }
 
     // AUTOPILOT — if score clears threshold, auto-draft + auto-send outreach
-    const origin =
-      req.headers.get("origin") ||
-      `http://${req.headers.get("host") ?? "localhost:3000"}`
-    const autopilot = await autopilotAfterScore(candidate.id, origin)
+    const autopilot = await autopilotAfterScore(candidate.id, getOrigin(req))
 
     // Re-fetch the candidate so the response has the latest status
     const finalCandidate = await prisma.candidate.findUnique({ where: { id: candidate.id } })
