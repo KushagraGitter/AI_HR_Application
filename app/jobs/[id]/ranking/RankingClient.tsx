@@ -131,6 +131,7 @@ export default function RankingClient({ jobId }: Props) {
                   key={c.id}
                   candidateId={c.id}
                   candidateName={c.name}
+                  candidateEmail={c.email}
                   emailDraft={c.emailDraft}
                   availabilityToken={c.availabilityToken}
                   alreadySent={["outreach_sent", "availability_received", "scheduled"].includes(c.status)}
