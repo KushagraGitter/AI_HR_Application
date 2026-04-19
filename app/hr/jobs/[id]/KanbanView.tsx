@@ -189,6 +189,7 @@ export default function KanbanView({ jobId, jobTitle }: Props) {
           candidate={selectedCandidate}
           minScore={minScore}
           actionLoading={actionLoading}
+          traceNodes={traceNodes}
           onClose={() => setSelectedId(null)}
           onDraftOutreach={handleDraftOutreach}
           onSendEmail={handleSendEmail}
